@@ -8,8 +8,6 @@ set OPENSSL_ROOT=%PROJ%\..\openssl\prebuilt\win
 mkdir %BUILD_DIR%
 pushd %BUILD_DIR%
 
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-
 cmake %CURL_ROOT% ^
     -A x64 ^
     -DCMAKE_INSTALL_PREFIX=%PREBUILT_DIR% ^
