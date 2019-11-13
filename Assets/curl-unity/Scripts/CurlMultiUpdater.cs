@@ -44,7 +44,8 @@ namespace CurlUnity
 
         private void Awake()
         {
-            if (CurlLog.Assert(instance == null, "Only one CurlMultiUpdater instance is allowed"))
+            CurlLog.Assert(instance == null, "Only one CurlMultiUpdater instance is allowed");
+            if (instance == null)
             {
                 instance = this;
             }

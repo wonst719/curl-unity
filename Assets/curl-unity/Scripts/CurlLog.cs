@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace CurlUnity
 {
@@ -28,10 +29,10 @@ namespace CurlUnity
             else Debug.LogError(message);
         }
 
-        public static bool Assert(bool condition, string message)
+        [Conditional("UNITY_ASSERTIONS")]
+        public static void Assert(bool condition, string message)
         {
-            if (!condition) LogError(message);
-            return condition;
+            Debug.Assert(condition, message);
         }
     }
 }
