@@ -94,7 +94,7 @@ namespace CurlUnity
         [DllImport(LIB_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern CURLM curl_multi_cleanup(IntPtr multiPtr);
         [DllImport(LIB_NAME, CallingConvention = CallingConvention.Cdecl)]
-        public static extern CURLE curl_multi_add_handle(IntPtr multiPtr, IntPtr easyPtr);
+        public static extern CURLM curl_multi_add_handle(IntPtr multiPtr, IntPtr easyPtr);
         [DllImport(LIB_NAME, CallingConvention = CallingConvention.Cdecl)]
         public static extern CURLM curl_multi_remove_handle(IntPtr multiPtr, IntPtr easyPtr);
         [DllImport(LIB_NAME, CallingConvention = CallingConvention.Cdecl)]
