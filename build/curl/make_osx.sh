@@ -26,7 +26,7 @@ do_make()
             -DBUILD_TESTING=OFF \
             -DBUILD_SHARED_LIBS=ON
     )
-    cmake --build $BUILD_DIR --config Release --target install -j8
+    cmake --build $BUILD_DIR --config Release --target install
 }
 
 do_make

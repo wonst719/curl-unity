@@ -32,7 +32,7 @@ do_make()
             -DBUILD_SHARED_LIBS=OFF \
             -DBUILD_CURL_EXE=OFF
     )
-    cmake --build $BUILD_DIR --config Release --target install -j8
+    cmake --build $BUILD_DIR --config Release --target install
 }
 
 do_make
