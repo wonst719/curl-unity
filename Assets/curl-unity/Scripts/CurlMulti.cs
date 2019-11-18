@@ -12,6 +12,8 @@ namespace CurlUnity
         private CurlShare share;
         private Dictionary<IntPtr, CurlEasy> workingEasies = new Dictionary<IntPtr, CurlEasy>();
 
+        private volatile bool started = false;
+
         public CurlMulti(IntPtr ptr = default)
         {
             if (ptr != IntPtr.Zero)
@@ -50,7 +52,7 @@ namespace CurlUnity
             {
                 CurlEasy[] easies = null;
 
-                lock (this)
+                lock (workingEasies)
                 {
                     easies = workingEasies.Values.ToArray();
                 }
@@ -64,32 +66,73 @@ namespace CurlUnity
             }
         }
 
-        internal void AddEasy(CurlEasy easy)
+        public void Start()
         {
-            Lib.curl_multi_add_handle(multiPtr, (IntPtr)easy);
-            easy.SetOpt(CURLOPT.SHARE, (IntPtr)share);
+            if (started)
+                return;
 
-            int workingCount = 0;
-
-            lock (this)
+            var workingCount = workingEasies.Count;
+            if (workingCount > 0 && CurlMultiUpdater.Instance != null)
             {
-                workingEasies[(IntPtr)easy] = easy;
-                workingCount = workingEasies.Count;
+                started = true;
+                CurlMultiUpdater.Instance.AddMulti(this);
+            }
+        }
+
+        public void Stop()
+        {
+            if (!started)
+                return;
+
+            started = false;
+
+            {
+                CurlEasy[] easies = null;
+
+                lock (workingEasies)
+                {
+                    easies = workingEasies.Values.ToArray();
+                }
+
+                foreach (var easy in easies)
+                {
+                    easy.Abort();
+                }
             }
 
-            if (workingCount == 1 && CurlMultiUpdater.Instance != null)
+            if (CurlMultiUpdater.Instance != null)
             {
-                CurlMultiUpdater.Instance.AddMulti(this);
+                CurlMultiUpdater.Instance.RemoveMulti(this);
+            }
+        }
+
+        internal void AddEasy(CurlEasy easy)
+        {
+            lock (this)
+            {
+                var wc = workingEasies.Count;
+                var res = Lib.curl_multi_add_handle(multiPtr, (IntPtr)easy);
+                CurlLog.Assert(res == CURLM.OK, $"AddEasy {easy.uri} {res} {wc}");
+                easy.SetOpt(CURLOPT.SHARE, (IntPtr)share);
+            }
+
+            lock (workingEasies)
+            {
+                workingEasies[(IntPtr)easy] = easy;
             }
         }
 
         internal void RemoveEasy(CurlEasy easy)
         {
-            Lib.curl_multi_remove_handle(multiPtr, (IntPtr)easy);
+            lock (this)
+            {
+                var res = Lib.curl_multi_remove_handle(multiPtr, (IntPtr)easy);
+                CurlLog.Assert(res == CURLM.OK, $"RemoveEasy {res}");
+            }
 
             int workingCount = 0;
 
-            lock (this)
+            lock (workingEasies)
             {
                 workingEasies.Remove((IntPtr)easy);
                 workingCount = workingEasies.Count;
@@ -103,11 +146,18 @@ namespace CurlUnity
 
         internal int Perform()
         {
+            if (!started)
+                return 0;
+
             long running = 0;
 
             if (multiPtr != IntPtr.Zero)
             {
-                Lib.curl_multi_perform(multiPtr, ref running);
+                lock (this)
+                {
+                    var res = Lib.curl_multi_perform(multiPtr, ref running);
+                    CurlLog.Assert(res == CURLM.OK, $"Perform {res}");
+                }
 
                 while (true)
                 {
@@ -120,7 +170,7 @@ namespace CurlUnity
                         {
                             CurlEasy easy = null;
 
-                            lock (this)
+                            lock (workingEasies)
                             {
                                 workingEasies.TryGetValue(msg.easyPtr, out easy);
                             }
@@ -138,7 +188,6 @@ namespace CurlUnity
                     }
                 }
             }
-
             return (int)running;
         }
 
