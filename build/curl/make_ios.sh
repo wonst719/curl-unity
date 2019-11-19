@@ -30,7 +30,8 @@ do_make()
             -DCMAKE_USE_LIBSSH2=OFF \
             -DBUILD_TESTING=OFF \
             -DBUILD_SHARED_LIBS=OFF \
-            -DBUILD_CURL_EXE=OFF
+            -DBUILD_CURL_EXE=OFF \
+            -DCURL_ZLIB=OFF
     )
     cmake --build $BUILD_DIR --config Release --target install
 }
