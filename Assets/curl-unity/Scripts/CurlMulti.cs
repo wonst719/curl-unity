@@ -130,17 +130,9 @@ namespace CurlUnity
                 CurlLog.Assert(res == CURLM.OK, $"RemoveEasy {res}");
             }
 
-            int workingCount = 0;
-
             lock (workingEasies)
             {
                 workingEasies.Remove((IntPtr)easy);
-                workingCount = workingEasies.Count;
-            }
-
-            if (workingCount == 0 && CurlMultiUpdater.Instance != null)
-            {
-                CurlMultiUpdater.Instance.RemoveMulti(this);
             }
         }
 
