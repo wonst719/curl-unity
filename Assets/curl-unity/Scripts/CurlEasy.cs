@@ -42,6 +42,9 @@ namespace CurlUnity
         public bool debug { get; set; }
         public CurlDecoder decoder { get; set; }
 
+        public bool dump { get; set; } = false;
+        public bool useHttp2 { get; set; } = true;
+
         public string outText
         {
             get
@@ -170,6 +173,8 @@ namespace CurlUnity
         public void Dispose()
         {
             Abort();
+            inData = null;
+            outData = null;
         }
 
         public void Reset()
@@ -340,10 +345,12 @@ namespace CurlUnity
         {
             if (performCallback != null)
             {
+                var localCopiedPerformCallback = performCallback;
+                performCallback = null;
+
                 new Task(() =>
                 {
-                    performCallback(result, this);
-                    performCallback = null;
+                    localCopiedPerformCallback(result, this);
                     running = false;
                 }).Start(taskScheduler);
             }
@@ -411,7 +418,10 @@ namespace CurlUnity
                         break;
                 }
 
-                SetOpt(CURLOPT.HTTP_VERSION, (long)HTTPVersion.VERSION_2TLS);
+                if (useHttp2)
+                    SetOpt(CURLOPT.HTTP_VERSION, (long)HTTPVersion.VERSION_2TLS);
+                else
+                    SetOpt(CURLOPT.HTTP_VERSION, (long)HTTPVersion.VERSION_1_1);
                 SetOpt(CURLOPT.PIPEWAIT, true);
                 
                 SetOpt(CURLOPT.SSL_VERIFYHOST, !insecure);
@@ -617,6 +627,9 @@ namespace CurlUnity
 
         private void Dump()
         {
+            if (!dump)
+                return;
+
             try
             {
                 var sb = new StringBuilder();
