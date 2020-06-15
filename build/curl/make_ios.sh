@@ -16,8 +16,8 @@ do_make()
         cmake $CURL_ROOT \
             -DCMAKE_INSTALL_PREFIX=$PREBUILT_DIR \
             -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN \
-            -DIOS_PLATFORM=OS64 \
-            -DDEPLOYMENT_TARGET=12.0 \
+            -DPLATFORM=OS \
+            -DDEPLOYMENT_TARGET=8.0 \
             -DENABLE_BITCODE=1 \
             -DOPENSSL_ROOT_DIR=$OPENSSL_ROOT \
             -DOPENSSL_INCLUDE_DIR=$OPENSSL_ROOT/include \
