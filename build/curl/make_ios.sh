@@ -17,7 +17,7 @@ do_make()
             -DCMAKE_INSTALL_PREFIX=$PREBUILT_DIR \
             -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN \
             -DPLATFORM=OS \
-            -DDEPLOYMENT_TARGET=8.0 \
+            -DDEPLOYMENT_TARGET=10.0 \
             -DENABLE_BITCODE=1 \
             -DOPENSSL_ROOT_DIR=$OPENSSL_ROOT \
             -DOPENSSL_INCLUDE_DIR=$OPENSSL_ROOT/include \
